@@ -26,6 +26,7 @@ class Node:
     val: float | str
 
 
+@dataclass
 class BinaryOp(Node):
     left: Node
     right: Node
@@ -68,9 +69,9 @@ class Parser:
         except StopIteration:
             return None
 
-    def _expect(self, expected: Token):
-        if self.tok != expected:
-            raise SyntaxError(f"{self.tok}: Expected {expected}")
+    def _expect(self, expected: str):
+        if self.tok.val != expected:
+            raise SyntaxError(f"{self.tok.val}: Expected {expected}")
         self._consume()
 
     def _consume(self) -> None:
@@ -78,24 +79,24 @@ class Parser:
 
     def expr(self) -> Node:
         res = self.term()
-        while (op := self._advance()) and op in (Tokens.PLUS, Tokens.MINUS):
+        while (op := self._advance()) and op.val in ("+", "-"):
             right = self.term()
-            res = Plus(res, right) if op == Tokens.PLUS else Minus(res, right)
+            res = Plus("+", res, right) if op == "+" else Minus("-", res, right)
         return res
 
     def term(self) -> Node:
         res = self.factor()
-        while (op := self._advance()) and op in (Tokens.MUL, Tokens.DIV):
+        while (op := self._advance()) and op in ("*", "/"):
             right = self.term()
-            res = Mul(res, right) if op == Tokens.MUL else Div(res, right)
+            res = Mul("*", res, right) if op == "*" else Div("/", res, right)
         return res
 
     def factor(self) -> Node:
         tok: Token = self._advance()
-        if tok == Tokens.LPAREN:
+        if tok.val == "(":
             self._consume()
             res = self.expr()
-            self._expect(Tokens.RPAREN)
+            self._expect("(")
         else:
             res = Num(tok)
             self._advance()

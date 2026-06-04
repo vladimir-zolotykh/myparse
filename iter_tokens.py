@@ -12,6 +12,11 @@ class Token:
     name: str
     val: Any
 
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.val == other
+        return self.val == other.val
+
 
 class TokensMeta(type):
     def __iter__(cls):
