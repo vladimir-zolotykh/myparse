@@ -14,13 +14,31 @@ class Token:
 
 
 class TokensMeta(type):
+    token_names = []
+
+    def __iter__(cls):
+        yield from cls._token_names
+
+    # def __iter__(cls):
+    #     for key, val in cls.__dict__.items():
+    #         if key.isupper():
+    #             yield key
+
     def __new__(mcls, clsname, bases, clsdict):
+        # def iter(self):
+        #     # yield from mcls.token_names
+        #     for tok in mcls.token_names:
+        #         yield tok
+
         for key, val in clsdict.items():
             if key not in ("__module__", "__qualname__"):
                 # key: NAME, NUM, iter_tokens
                 if isinstance(val, str):
                     rval = rf"(?P<{key}>{val})"
                     clsdict[key] = rval
+                    mcls.token_names.append(key)
+        # clsdict["__iter__"] = iter
+        clsdict["_token_names"] = mcls.token_names
         return super().__new__(mcls, clsname, bases, clsdict)
 
     @classmethod
@@ -42,8 +60,13 @@ class Tokens(metaclass=TokensMeta):
     WS = r"\w+"
 
     def iter_tokens(self, str_to_parse):
+        # for tok in self.__class__:
+        #     print(tok)
+        # masterpat = "|".join(
+        #     (val for key, val in self.__class__.__dict__.items() if key.isupper())
+        # )
         masterpat = "|".join(
-            (val for key, val in self.__class__.__dict__.items() if key.isupper())
+            (getattr(self, key) for key in self.__class__)  #  if key.isupper())
         )
         for m in re.finditer(masterpat, str_to_parse):
             token = Token(m.lastgroup, m.group(0))
