@@ -125,10 +125,10 @@ class Parser:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.WARN)
     p = Parser()
-    # res: Node = p.parse("2 + (3 + 4) * 5")
-    # res: Node = p.parse("2")
-    # print(res)
+    res: Node = p.parse("2")
     res = p.parse("2 + 3")
-    print(res)
+    res = p.parse("2 + 3 * 4")
+    res = p.parse("2 + (3 + 4) * 5")
+    res = p.parse("2 + (3 + * 4)")
