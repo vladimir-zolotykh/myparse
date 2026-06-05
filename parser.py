@@ -84,7 +84,7 @@ class TokensCash:
             raise StopIteration
 
     def __repr__(self):
-        return ", ".join(tok.name for tok in self._cash[: self._index])
+        return ", ".join(repr(tok) for tok in self._cash[: self._index])
 
 
 class Parser:
