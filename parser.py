@@ -4,7 +4,10 @@
 from __future__ import annotations
 from typing import Iterator, Any
 from dataclasses import dataclass
+import logging
+from functools import wraps
 from iter_tokens import Token, Tokens
+
 
 # >>> e = ExpressionEvaluator()
 # >>> e.parse('2')
@@ -55,6 +58,17 @@ class Num(Node):
     pass
 
 
+def log_tokens(func):
+    @wraps(func)
+    def wrapper(*args, **kwds):
+        self = args[0]
+        logging.info(f"[{func.__name__}] {self.tok = }")
+        res = func(*args, **kwds)
+        return res
+
+    return wrapper
+
+
 class Parser:
     def __init__(self):
         self.tokens: Iterator[Token] | None = None  # type(None)
@@ -80,6 +94,7 @@ class Parser:
     def _consume(self) -> None:
         self.tok = next(self.tokens)
 
+    @log_tokens
     def expr(self) -> Node:
         res = self.term()
         while (op := self._advance()) and op.val in ("+", "-"):
@@ -87,6 +102,7 @@ class Parser:
             res = Plus("+", res, right) if op == "+" else Minus("-", res, right)
         return res
 
+    @log_tokens
     def term(self) -> Node:
         res = self.factor()
         while (op := self._advance()) and op in ("*", "/"):
@@ -94,9 +110,11 @@ class Parser:
             res = Mul("*", res, right) if op == "*" else Div("/", res, right)
         return res
 
+    @log_tokens
     def factor(self) -> Node:
         tok: Token = self._advance()
-        if tok.val == "(":
+        # tok = self.tok
+        if tok == "(":
             self._consume()
             res = self.expr()
             self._expect("(")
@@ -107,6 +125,10 @@ class Parser:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     p = Parser()
-    res: Node = p.parse("2 + (3 + 4) * 5")
+    # res: Node = p.parse("2 + (3 + 4) * 5")
+    # res: Node = p.parse("2")
+    # print(res)
+    res = p.parse("2 + 3")
     print(res)
