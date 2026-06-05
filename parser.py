@@ -127,7 +127,9 @@ class Parser:
     @log_tokens
     def expr(self) -> Node:
         res = self.term()
-        while (op := self._advance()) and op.val in ("+", "-"):
+        # while (op := self._advance()) and op.val in ("+", "-"):
+        while (op := self.tok) and op.val in ("+", "-"):
+            self._consume()
             right = self.term()
             res = Plus("+", res, right) if op.val == "+" else Minus("-", res, right)
         return res
@@ -135,7 +137,9 @@ class Parser:
     @log_tokens
     def term(self) -> Node:
         res = self.factor()
-        while (op := self._advance()) and op.val in ("*", "/"):
+        # while (op := self._advance()) and op.val in ("*", "/"):
+        while (op := self.tok) and op.val in ("*", "/"):
+            self._consume()
             right = self.factor()
             res = Mul("*", res, right) if op.val == "*" else Div("/", res, right)
         return res

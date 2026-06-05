@@ -20,6 +20,7 @@ class Token:
 
 class TokensMeta(type):
     def __iter__(cls):
+        # cls : Tokens
         yield from cls._token_names
 
     def __new__(mcls, clsname, bases, clsdict):
@@ -51,12 +52,15 @@ class Tokens(metaclass=TokensMeta):
     DIV = r"/"
     LPAREN = r"\("
     RPAREN = r"\)"
-    WS = r"\w+"
+    WS = r"\s+"
 
     def iter_tokens(self, str_to_parse):
+        # self.__class__ : iter_tokens.Tokens
         masterpat = "|".join((getattr(self, key) for key in self.__class__))
         for m in re.finditer(masterpat, str_to_parse):
-            yield Token(m.lastgroup, m.group(0))
+            tok = Token(m.lastgroup, m.group(0))
+            if tok.name != "WS":
+                yield tok
 
 
 if __name__ == "__main__":
