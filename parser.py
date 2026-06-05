@@ -25,6 +25,9 @@ from iter_tokens import Token, Tokens
 class Node:
     val: float | str
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.val!r})"
+
 
 @dataclass
 class BinaryOp(Node):
@@ -87,7 +90,7 @@ class Parser:
     def term(self) -> Node:
         res = self.factor()
         while (op := self._advance()) and op in ("*", "/"):
-            right = self.term()
+            right = self.factor()
             res = Mul("*", res, right) if op == "*" else Div("/", res, right)
         return res
 
@@ -98,7 +101,7 @@ class Parser:
             res = self.expr()
             self._expect("(")
         else:
-            res = Num(tok)
+            res = Num(tok.val)
             self._advance()
             return res
 
