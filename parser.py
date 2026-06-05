@@ -62,26 +62,49 @@ def log_tokens(func):
     @wraps(func)
     def wrapper(*args, **kwds):
         self = args[0]
-        logging.info(f"[{func.__name__}] {self.tok = }")
+        logging.info(f"[{func.__name__}] {self.cash!r}")
         res = func(*args, **kwds)
         return res
 
     return wrapper
 
 
+class TokensCash:
+    def __init__(self, str_to_parse: str):
+        self._tokens = Tokens().iter_tokens(str_to_parse)
+        self._cash: list[Token] = list(self._tokens)
+        self._index = 0
+
+    def next(self) -> Token:
+        try:
+            val: Token = self._cash[self._index]
+            self._index += 1
+            return val
+        except IndexError:
+            raise StopIteration
+
+    def __repr__(self):
+        return ", ".join(tok.name for tok in self._cash[: self._index])
+
+
 class Parser:
     def __init__(self):
-        self.tokens: Iterator[Token] | None = None  # type(None)
+        # self.tokens: Iterator[Token] | None = None  # type(None)
+        self.cash: TokensCash = None
         self.tok: Token | None = None
 
     def parse(self, str_to_parse: str):
-        self.tokens = Tokens().iter_tokens(str_to_parse)
+        logging.info(f"[parse] {str_to_parse = }")
+
+        # self.tokens = Tokens().iter_tokens(str_to_parse)
+        self.cash = TokensCash(str_to_parse)
         self._advance()
         return self.expr()
 
     def _advance(self) -> Token | None:
         try:
-            self.tok = next(self.tokens)
+            # self.tok = next(self.tokens)
+            self.tok = self.cash.next()
             return self.tok
         except StopIteration:
             return None
@@ -92,7 +115,8 @@ class Parser:
         self._consume()
 
     def _consume(self) -> None:
-        self.tok = next(self.tokens)
+        # self.tok = next(self.tokens)
+        self.tok = self.cash.next()
 
     @log_tokens
     def expr(self) -> Node:
@@ -125,7 +149,7 @@ class Parser:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARN)
+    logging.basicConfig(level=logging.DEBUG)
     p = Parser()
     res: Node = p.parse("2")
     res = p.parse("2 + 3")
