@@ -92,8 +92,7 @@ class Parser:
         self._consume()
 
     def _consume(self) -> None:
-        assert self.tokens, "Cannot happen"
-        self.tok = next(self.tokens)
+        self.tok = next(require(self.tokens))
 
     def expr(self) -> Node:
         res = self.term()
