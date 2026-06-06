@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+from functools import singledispatchmethod
 from parser import Parser
 import node as N
 
@@ -13,6 +14,28 @@ class Visitor:
 
     def visit_generic(self, node: N.Node):
         raise TypeError(f"No method {self.name} in type {self.__class__.__name__}")
+
+
+class CalcDispatch:
+    @singledispatchmethod
+    def visit(self, node):
+        raise NotImplementedError(f"No visit method for {node.__class__.__name__}")
+
+    @visit.register
+    def _(self, n: N.Num):
+        return n.val
+
+    @visit.register
+    def _(self, n: N.Plus):
+        return self.visit(n.left) + self.visit(n.right)
+
+    @visit.register
+    def _(self, n: N.Mul):
+        return self.visit(n.left) * self.visit(n.right)
+
+    @visit.register
+    def _(self, n: N.Div):
+        return self.visit(n.left) / self.visit(n.right)
 
 
 class Calc(Visitor):
@@ -34,7 +57,12 @@ class Infix(Visitor):
 
 
 if __name__ == "__main__":
+    # e = "2 + (3 + 4) * 5"
+    # expected = eval(e)
+    # node: N.Node = Parser().parse(e)
+    # print(f"{expected = }, got: {Calc().visit(node)}")
+
     e = "2 + (3 + 4) * 5"
     expected = eval(e)
     node: N.Node = Parser().parse(e)
-    print(f"{expected = }, got: {Calc().visit(node)}")
+    print(f"{expected = }, got: {CalcDispatch().visit(node)}")
