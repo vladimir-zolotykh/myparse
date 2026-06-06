@@ -63,43 +63,24 @@ class Num(Node):
     pass
 
 
-class TokensCash:
-    def __init__(self, str_to_parse: str):
-        self._tokens = Tokens().iter_tokens(str_to_parse)
-        self._cash: list[Token] = list(self._tokens)
-        logging.info(f"[TokensCash.__init__] {self._cash!r}")
-        self._index = 0
-
-    def next(self) -> Token:
-        try:
-            val: Token = self._cash[self._index]
-            self._index += 1
-            return val
-        except IndexError:
-            raise StopIteration
-
-    def __repr__(self):
-        return ", ".join(repr(tok) for tok in self._cash[: self._index])
-
-
 class Parser:
     def __init__(self):
-        # self.tokens: Iterator[Token] | None = None  # type(None)
-        self.cash: TokensCash = None
+        self.tokens: Iterator[Token] | None = None  # type(None)
+        # self.cash: TokensCash = None
         self.tok: Token | None = None
 
     def parse(self, str_to_parse: str):
-        logging.info(f"[parse] {str_to_parse = }")
+        # logging.info(f"[parse] {str_to_parse = }")
 
-        # self.tokens = Tokens().iter_tokens(str_to_parse)
-        self.cash = TokensCash(str_to_parse)
+        self.tokens = Tokens().iter_tokens(str_to_parse)
+        # self.cash = TokensCash(str_to_parse)
         self._advance()
         return self.expr()
 
     def _advance(self) -> Token | None:
         try:
-            # self.tok = next(self.tokens)
-            self.tok = self.cash.next()
+            self.tok = next(self.tokens)
+            # self.tok = self.cash.next()
             return self.tok
         except StopIteration:
             return None
@@ -110,8 +91,8 @@ class Parser:
         self._consume()
 
     def _consume(self) -> None:
-        # self.tok = next(self.tokens)
-        self.tok = self.cash.next()
+        self.tok = next(self.tokens)
+        # self.tok = self.cash.next()
 
     def expr(self) -> Node:
         res = self.term()
