@@ -64,24 +64,27 @@ class Parser:
         self.tokens: Iterator[Token] | None = None  # type(None)
         self.tok: Token | None = None
 
-    def parse(self, str_to_parse: str):
+    def parse(self, str_to_parse: str) -> Node:
         self.tokens = Tokens().iter_tokens(str_to_parse)
         self._advance()
         return self.expr()
 
     def _advance(self) -> Token | None:
         try:
+            assert self.tokens, "Cannot happen"
             self.tok = next(self.tokens)
             return self.tok
         except StopIteration:
             return None
 
-    def _expect(self, expected: str):
+    def _expect(self, expected: str) -> None:
+        assert self.tok, "Cannot happen"
         if self.tok.val != expected:
             raise SyntaxError(f"{self.tok.val}: Expected {expected}")
         self._consume()
 
     def _consume(self) -> None:
+        assert self.tokens, "Cannot happen"
         self.tok = next(self.tokens)
 
     def expr(self) -> Node:
@@ -102,6 +105,7 @@ class Parser:
 
     def factor(self) -> Node:
         tok = self.tok
+        assert tok, "Cannot happen"
         if tok == "(":
             self._consume()
             res = self.expr()

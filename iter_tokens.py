@@ -19,6 +19,8 @@ class Token:
 
 
 class TokensMeta(type):
+    _token_names: list[str] = []
+
     def __iter__(cls):
         # cls : Tokens
         yield from cls._token_names
@@ -58,6 +60,7 @@ class Tokens(metaclass=TokensMeta):
         # self.__class__ : iter_tokens.Tokens
         masterpat = "|".join((getattr(self, key) for key in self.__class__))
         for m in re.finditer(masterpat, str_to_parse):
+            assert m.lastgroup, "Cannot happen"
             tok = Token(m.lastgroup, m.group(0))
             if tok.name != "WS":
                 yield tok
