@@ -62,19 +62,16 @@ class Num(Node):
 class Parser:
     def __init__(self):
         self.tokens: Iterator[Token] | None = None  # type(None)
-        # self.cash: TokensCash = None
         self.tok: Token | None = None
 
     def parse(self, str_to_parse: str):
         self.tokens = Tokens().iter_tokens(str_to_parse)
-        # self.cash = TokensCash(str_to_parse)
         self._advance()
         return self.expr()
 
     def _advance(self) -> Token | None:
         try:
             self.tok = next(self.tokens)
-            # self.tok = self.cash.next()
             return self.tok
         except StopIteration:
             return None
@@ -86,7 +83,6 @@ class Parser:
 
     def _consume(self) -> None:
         self.tok = next(self.tokens)
-        # self.tok = self.cash.next()
 
     def expr(self) -> Node:
         res = self.term()
