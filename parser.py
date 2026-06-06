@@ -2,12 +2,8 @@
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 from __future__ import annotations
-from typing import Iterator, Any
+from typing import Iterator
 from dataclasses import dataclass
-import logging
-from functools import wraps
-import copy
-from numbers import Number
 from iter_tokens import Token, Tokens
 
 
@@ -70,8 +66,6 @@ class Parser:
         self.tok: Token | None = None
 
     def parse(self, str_to_parse: str):
-        # logging.info(f"[parse] {str_to_parse = }")
-
         self.tokens = Tokens().iter_tokens(str_to_parse)
         # self.cash = TokensCash(str_to_parse)
         self._advance()
@@ -127,7 +121,6 @@ class Parser:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARN)
     p = Parser()
     e = "2"
     res: Node = p.parse(e)
