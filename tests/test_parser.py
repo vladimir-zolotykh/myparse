@@ -2,14 +2,14 @@
 
 import pytest
 
-from parser import (
-    Parser,
+from node import (
     Num,
     Plus,
     Minus,
     Mul,
     Div,
 )
+from parser import Parser
 
 
 @pytest.fixture

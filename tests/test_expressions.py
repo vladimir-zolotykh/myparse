@@ -1,5 +1,6 @@
 import pytest
-from parser import Parser, Num, Plus, Mul
+from node import Num, Plus, Mul
+from parser import Parser
 
 
 @pytest.mark.parametrize(
