@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 from __future__ import annotations
-from typing import Iterator
+from typing import Iterator, TypeVar
 from dataclasses import dataclass
 from iter_tokens import Token, Tokens
 
@@ -59,6 +59,14 @@ class Num(Node):
     pass
 
 
+T = TypeVar("T")
+
+
+def require(val: T | None) -> T:
+    assert val is not None, "Cannot happen"
+    return val
+
+
 class Parser:
     def __init__(self):
         self.tokens: Iterator[Token] | None = None  # type(None)
@@ -104,8 +112,7 @@ class Parser:
         return res
 
     def factor(self) -> Node:
-        tok = self.tok
-        assert tok, "Cannot happen"
+        tok = require(self.tok)
         if tok == "(":
             self._consume()
             res = self.expr()
