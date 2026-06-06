@@ -60,24 +60,7 @@ class Div(BinaryOp):
 
 
 class Num(Node):
-    # def __repr__(self):
-    #     if isinstance(self.val, float):
-    #         return str(self.val)
-    #     else:
-    #         return super().__repr__()
     pass
-
-
-def log_tokens(func):
-    @wraps(func)
-    def wrapper(*args, **kwds):
-        self = args[0]
-        # cash0 = copy.copy(self.cash)
-        res = func(*args, **kwds)
-        logging.info(f"[{func.__name__}] {self.cash!r}")
-        return res
-
-    return wrapper
 
 
 class TokensCash:
@@ -113,7 +96,6 @@ class Parser:
         self._advance()
         return self.expr()
 
-    @log_tokens
     def _advance(self) -> Token | None:
         try:
             # self.tok = next(self.tokens)
@@ -122,18 +104,15 @@ class Parser:
         except StopIteration:
             return None
 
-    @log_tokens
     def _expect(self, expected: str):
         if self.tok.val != expected:
             raise SyntaxError(f"{self.tok.val}: Expected {expected}")
         self._consume()
 
-    @log_tokens
     def _consume(self) -> None:
         # self.tok = next(self.tokens)
         self.tok = self.cash.next()
 
-    @log_tokens
     def expr(self) -> Node:
         res = self.term()
         while (op := self.tok) and op in ("+", "-"):
@@ -142,7 +121,6 @@ class Parser:
             res = Plus("+", res, right) if op == "+" else Minus("-", res, right)
         return res
 
-    @log_tokens
     def term(self) -> Node:
         res = self.factor()
         while (op := self.tok) and op in ("*", "/"):
@@ -151,7 +129,6 @@ class Parser:
             res = Mul("*", res, right) if op == "*" else Div("/", res, right)
         return res
 
-    @log_tokens
     def factor(self) -> Node:
         tok = self.tok
         if tok == "(":
