@@ -79,14 +79,13 @@ class Parser:
 
     def _advance(self) -> Token | None:
         try:
-            assert self.tokens, "Cannot happen"
-            self.tok = next(self.tokens)
+            self.tok = next(require(self.tokens))
             return self.tok
         except StopIteration:
             return None
 
     def _expect(self, expected: str) -> None:
-        assert self.tok, "Cannot happen"
+        self.tok = require(self.tok)
         if self.tok.val != expected:
             raise SyntaxError(f"{self.tok.val}: Expected {expected}")
         self._consume()
