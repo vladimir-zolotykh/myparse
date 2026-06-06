@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import logging
 from functools import wraps
 import copy
+from numbers import Number
 from iter_tokens import Token, Tokens
 
 
@@ -38,6 +39,9 @@ class BinaryOp(Node):
     left: Node
     right: Node
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.left!r}, {self.right!r})"
+
 
 class Plus(BinaryOp):
     pass
@@ -56,6 +60,11 @@ class Div(BinaryOp):
 
 
 class Num(Node):
+    # def __repr__(self):
+    #     if isinstance(self.val, float):
+    #         return str(self.val)
+    #     else:
+    #         return super().__repr__()
     pass
 
 
@@ -151,19 +160,34 @@ class Parser:
         if tok.val == "(":
             self._consume()
             res = self.expr()
-            self._expect("(")
+            self._expect(")")
         else:
-            res = Num(tok.val)
-            self._advance()
+            try:
+                res = Num(float(tok.val))
+                self._advance()
+            except ValueError as exc:
+                raise SyntaxError(f"{tok.val!r} Expected ( or NUMBER") from exc
+
         return res
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.WARN)
     p = Parser()
-    # res: Node = p.parse("2")
-    res = p.parse("2 + 3")
-    print(res)
-    # res = p.parse("2 + 3 * 4")
-    # res = p.parse("2 + (3 + 4) * 5")
-    # res = p.parse("2 + (3 + * 4)")
+    e = "2"
+    res: Node = p.parse(e)
+    print(f"{e = }, {res = }")
+    e = "2 + 3"
+    res = p.parse(e)
+    print(f"{e = }, {res = }")
+    e = "2 + 3 * 4"
+    res = p.parse(e)
+    print(f"{e = }, {res = }")
+    e = "2 + (3 + 4) * 5"
+    res = p.parse(e)
+    print(f"{e = }, {res = }")
+    e = "2 + (3 + * 4)"
+    try:
+        res = p.parse(e)
+    except SyntaxError as exc:
+        print(exc)
