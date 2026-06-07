@@ -1,54 +1,58 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+from typing import NoReturn, Generic, TypeVar, cast
+from collections.abc import Callable
 from functools import singledispatchmethod
 from parser import Parser
 import node as N
 
+T = TypeVar("T")
 
-class Visitor:
-    def visit(self, node: N.Node):
+
+class Visitor(Generic[T]):
+    def visit(self, node: N.Node) -> T:
         self.name = f"visit{type(node).__name__}"
-        func = getattr(self, self.name, self.visit_generic)
+        func = cast(Callable[[N.Node], T], getattr(self, self.name, self.visit_generic))
         return func(node)
 
-    def visit_generic(self, node: N.Node):
+    def visit_generic(self, node: N.Node) -> NoReturn:
         raise TypeError(f"No method {self.name} in type {self.__class__.__name__}")
 
 
 class CalcDispatch:
     @singledispatchmethod
-    def visit(self, node):
+    def visit(self, node: N.Node) -> float:
         raise NotImplementedError(f"No visit method for {node.__class__.__name__}")
 
     @visit.register
-    def _(self, n: N.Num):
-        return n.val
+    def _(self, n: N.Num) -> float:
+        return float(n.val)
 
     @visit.register
-    def _(self, n: N.Plus):
+    def _(self, n: N.Plus) -> float:
         return self.visit(n.left) + self.visit(n.right)
 
     @visit.register
-    def _(self, n: N.Mul):
+    def _(self, n: N.Mul) -> float:
         return self.visit(n.left) * self.visit(n.right)
 
     @visit.register
-    def _(self, n: N.Div):
+    def _(self, n: N.Div) -> float:
         return self.visit(n.left) / self.visit(n.right)
 
 
-class Calc(Visitor):
-    def visitNum(self, node: N.Num):
-        return node.val
+class Calc(Visitor[float]):
+    def visitNum(self, node: N.Num) -> float:
+        return float(node.val)
 
-    def visitPlus(self, node: N.Plus):
+    def visitPlus(self, node: N.Plus) -> float:
         return self.visit(node.left) + self.visit(node.right)
 
-    def visitMul(self, node: N.Mul):
+    def visitMul(self, node: N.Mul) -> float:
         return self.visit(node.left) * self.visit(node.right)
 
-    def visitDiv(self, node: N.Div):
+    def visitDiv(self, node: N.Div) -> float:
         return self.visit(node.left) / self.visit(node.right)
 
 
