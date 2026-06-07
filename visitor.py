@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+# flake8: noqa: F811
 from typing import NoReturn, Generic, TypeVar, cast
 from collections.abc import Callable
 from functools import singledispatchmethod
+from multipledispatch import dispatch
 from parser import Parser
 import node as N
 
@@ -18,6 +20,28 @@ class Visitor(Generic[T]):
 
     def visit_generic(self, node: N.Node) -> NoReturn:
         raise TypeError(f"No method {self.name} in type {self.__class__.__name__}")
+
+
+class CalcMulti:
+    @dispatch(N.Node)
+    def visit(self, n) -> float:
+        return float(n.val)
+
+    @dispatch(N.Plus)
+    def visit(self, n) -> float:
+        return self.visit(n.left) + self.visit(n.right)
+
+    @dispatch(N.Minus)
+    def visit(self, n) -> float:
+        return self.visit(n.left) - self.visit(n.right)
+
+    @dispatch(N.Mul)
+    def visit(self, n) -> float:
+        return self.visit(n.left) * self.visit(n.right)
+
+    @dispatch(N.Div)
+    def visit(self, n) -> float:
+        return self.visit(n.left) / self.visit(n.right)
 
 
 class CalcDispatch:
@@ -66,7 +90,12 @@ if __name__ == "__main__":
     # node: N.Node = Parser().parse(e)
     # print(f"{expected = }, got: {Calc().visit(node)}")
 
+    # e = "2 + (3 + 4) * 5"
+    # expected = eval(e)
+    # node: N.Node = Parser().parse(e)
+    # print(f"{expected = }, got: {CalcDispatch().visit(node)}")
+
     e = "2 + (3 + 4) * 5"
     expected = eval(e)
     node: N.Node = Parser().parse(e)
-    print(f"{expected = }, got: {CalcDispatch().visit(node)}")
+    print(f"{expected = }, got: {CalcMulti().visit(node)}")
