@@ -7,6 +7,7 @@ from typing import NoReturn, Generic, TypeVar, cast
 from collections.abc import Callable
 from functools import singledispatchmethod
 from multipledispatch import dispatch  # type: ignore[import-untyped]
+import pytest
 from parser import Parser
 import node as N
 
@@ -86,20 +87,13 @@ class Infix(Visitor):
 
 
 if __name__ == "__main__":
-    print("*** visit_generic")
-    e = "2 + (3 + 4) * 5"
-    expected = eval(e)
-    node: N.Node = Parser().parse(e)
-    print(f"{expected = }, got: {Calc().visit(node)}")
-
-    print("*** CalcDispatch")
-    e = "2 + (3 + 4) * 5"
-    expected = eval(e)
-    node: N.Node = Parser().parse(e)
-    print(f"{expected = }, got: {CalcDispatch().visit(node)}")
-
-    print("*** CalcMulti")
-    e = "2 + (3 + 4) * 5"
-    expected = eval(e)
-    node: N.Node = Parser().parse(e)
-    print(f"{expected = }, got: {CalcMulti().visit(node)}")
+    for parser_type, expr, expected in zip(
+        (Calc, CalcDispatch, CalcMulti),
+        ("2 + (3 + 4) * 5", "2 + (3 + 4) * 5", "2 + (3 + 4) * 5"),
+        (37.0, 37.0, 37.0),
+    ):
+        print(f"*** {parser_type.__name__}")
+        node: N.Node = Parser().parse(expr)
+        got = parser_type().visit(node)
+        print(f"{expected = }, {got = }")
+        assert parser_type().visit(node) == expected
