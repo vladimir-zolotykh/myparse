@@ -82,18 +82,29 @@ class Calc(Visitor[float]):
         return self.visit(node.left) / self.visit(node.right)
 
 
+class CalcEval(Visitor[str]):
+    def visitNum(self, node: N.Num) -> str:
+        return str(node.val)
+
+    def visitPlus(self, node: N.Plus) -> str:
+        return f"({self.visit(node.left)} + {self.visit(node.right)})"
+
+    def visitMul(self, node: N.Mul) -> str:
+        return f"({self.visit(node.left)} * {self.visit(node.right)})"
+
+    def visitDiv(self, node: N.Div) -> str:
+        return f"({self.visit(node.left)} / {self.visit(node.right)})"
+
+
 class Infix(Visitor):
     pass
 
 
-if __name__ == "__main__":
-    for parser_type, expr, expected in zip(
-        (Calc, CalcDispatch, CalcMulti),
-        ("2 + (3 + 4) * 5", "2 + (3 + 4) * 5", "2 + (3 + 4) * 5"),
-        (37.0, 37.0, 37.0),
-    ):
-        print(f"*** {parser_type.__name__}")
-        node: N.Node = Parser().parse(expr)
-        got = parser_type().visit(node)
-        print(f"{expected = }, {got = }")
-        assert parser_type().visit(node) == expected
+@pytest.mark.parametrize(
+    "calculator",
+    [Calc, CalcDispatch, CalcMulti, CalcEval],
+)
+def test_calc(calculator):
+    node: N.Node = Parser().parse("2 + (3 + 4) * 5")
+
+    assert eval(str(calculator().visit(node))) == 37.0
