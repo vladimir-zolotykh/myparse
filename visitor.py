@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 # flake8: noqa: F811
+# mypy: disable-error-code="no-redef"
 from typing import NoReturn, Generic, TypeVar, cast
 from collections.abc import Callable
 from functools import singledispatchmethod
-from multipledispatch import dispatch
+from multipledispatch import dispatch  # type: ignore[import-untyped]
 from parser import Parser
 import node as N
 
@@ -85,16 +86,19 @@ class Infix(Visitor):
 
 
 if __name__ == "__main__":
-    # e = "2 + (3 + 4) * 5"
-    # expected = eval(e)
-    # node: N.Node = Parser().parse(e)
-    # print(f"{expected = }, got: {Calc().visit(node)}")
+    print("*** visit_generic")
+    e = "2 + (3 + 4) * 5"
+    expected = eval(e)
+    node: N.Node = Parser().parse(e)
+    print(f"{expected = }, got: {Calc().visit(node)}")
 
-    # e = "2 + (3 + 4) * 5"
-    # expected = eval(e)
-    # node: N.Node = Parser().parse(e)
-    # print(f"{expected = }, got: {CalcDispatch().visit(node)}")
+    print("*** CalcDispatch")
+    e = "2 + (3 + 4) * 5"
+    expected = eval(e)
+    node: N.Node = Parser().parse(e)
+    print(f"{expected = }, got: {CalcDispatch().visit(node)}")
 
+    print("*** CalcMulti")
     e = "2 + (3 + 4) * 5"
     expected = eval(e)
     node: N.Node = Parser().parse(e)
